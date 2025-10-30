@@ -1,0 +1,63 @@
+"use client";
+import { useState } from "react";
+import { auth, db, storage } from "../lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
+export default function PostComposer() {
+  const [caption, setCaption] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (!file) return alert("Select a file first");
+    setUploading(true);
+
+    try {
+      const fileType = file.type.startsWith("video/") ? "video" : "image";
+      const fileRef = ref(storage, `media/${auth.currentUser?.uid}/${Date.now()}-${file.name}`);
+      await uploadBytes(fileRef, file);
+      const fileUrl = await getDownloadURL(fileRef);
+
+      await addDoc(collection(db, "posts"), {
+        authorId: auth.currentUser?.uid,
+        caption,
+        mediaUrl: fileUrl,
+        mediaType: fileType,
+        createdAt: serverTimestamp(),
+        likes: [],
+      });
+
+      setCaption("");
+      setFile(null);
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed.");
+    }
+    setUploading(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-4 bg-white rounded-2xl shadow-md mb-4">
+      <textarea
+        placeholder="Write a caption..."
+        className="w-full border rounded-lg p-2 mb-2"
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+      />
+      <input
+        type="file"
+        accept="image/*,video/*"
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        className="mb-2"
+      />
+      <button
+        disabled={uploading}
+        className="bg-blue-600 text-white px-4 py-2 rounded-lg w-full"
+      >
+        {uploading ? "Uploading..." : "Post"}
+      </button>
+    </form>
+  );
+}
