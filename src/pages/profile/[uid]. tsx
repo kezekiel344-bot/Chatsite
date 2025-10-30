@@ -1,0 +1,36 @@
+import FollowButton from "../../components/FollowButton";
+...
+
+export default function ProfilePage() {
+  ...
+  return (
+    <AuthGuard>
+      <div className="max-w-xl mx-auto py-6">
+        <div className="text-center mb-6">
+          <img
+            src={userData.photoURL || "/placeholder/user.png"}
+            className="w-24 h-24 rounded-full mx-auto mb-2"
+          />
+          <h2 className="text-xl font-bold">{userData.displayName}</h2>
+          <p className="text-gray-600">{userData.bio}</p>
+
+          <div className="flex justify-center gap-4 mt-2">
+            <p><strong>{userData.followers?.length || 0}</strong> Followers</p>
+            <p><strong>{userData.following?.length || 0}</strong> Following</p>
+          </div>
+
+          <div className="mt-3">
+            <FollowButton targetUid={uid as string} />
+          </div>
+        </div>
+
+        <h3 className="text-lg font-semibold mb-2 text-center">Posts</h3>
+        {posts.length === 0 ? (
+          <p className="text-center text-gray-500">No posts yet.</p>
+        ) : (
+          posts.map((post) => <PostCard key={post.id} post={post} />)
+        )}
+      </div>
+    </AuthGuard>
+  );
+}
