@@ -1,0 +1,2 @@
+export type UserProfile = { uid: string; displayName?: string; email?: string; photoURL?: string; bio?: string; };
+export type Post = { id?: string; authorId: string; authorName?: string; content?: string; mediaUrl?: string; mediaType?: 'image' | 'video' | null; likes?: number; createdAt?: any; };
